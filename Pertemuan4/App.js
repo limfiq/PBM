@@ -28,10 +28,11 @@ export default function App() {
 
   // Array for demonstrating loops
   const users = [
-    { id: 1, name: 'John' },
-    { id: 2, name: 'Jane' },
-    { id: 3, name: 'Bob' },
-    { id: 4, name: 'Alice' }
+    { id: 1, name: 'M. Taufiq' },
+    { id: 2, name: 'Hullatul' },
+    { id: 3, name: 'Kayla' },
+    { id: 4, name: 'Musa' },
+    { id: 5, name: 'Haisah' }
   ];
 
   // Event handlers
