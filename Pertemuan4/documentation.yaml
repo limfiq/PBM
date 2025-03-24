@@ -1,0 +1,99 @@
+openapi: 3.1.0
+info:
+  title: React Native Demo App API
+  description: Documentation for React Native app demonstrating basic concepts
+  version: 1.0.0
+  contact:
+    name: limfiq
+    email: mtaufiq39@gmail.com
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the user
+          example: 1
+        name:
+          type: string
+          description: User's name
+          example: "John"
+
+    Greeting:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name to display in greeting
+          example: "User"
+        isLoggedIn:
+          type: boolean
+          description: User's login status
+          example: true
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-KEY
+
+paths:
+  /users:
+    get:
+      summary: Get all users
+      description: Returns a list of all users
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+
+  /login:
+    post:
+      summary: Toggle user login status
+      description: Toggles between logged in and logged out states
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                currentStatus:
+                  type: boolean
+                  description: Current login status
+      responses:
+        "200":
+          description: Login status successfully toggled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isLoggedIn:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Login status updated successfully"
+
+tags:
+  - name: User Management
+    description: Operations about users
+  - name: Authentication
+    description: Login related operations
+
+servers:
+  - url: https://api.example.com/v1
+    description: Production server
+  - url: https://dev-api.example.com/v1
+    description: Development server
+
+security:
+  - ApiKeyAuth: []

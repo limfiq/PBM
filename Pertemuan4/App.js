@@ -1,6 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Button, ScrollView } from 'react-native';
 import { useState } from 'react';
+import ListStyles from './styles/ListStyles';
 
 // Custom component with props
 const Greeting = ({ name, isLoggedIn }) => {
@@ -44,13 +45,27 @@ export default function App() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Using custom component with props */}
+      {/* Using custom component with props and inline styles */}
+      <Text style={{
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#2c3e50',
+        marginBottom: 16,
+        textAlign: 'center',
+        textShadowColor: 'rgba(0, 0, 0, 0.1)',
+        textShadowOffset: { width: 1, height: 1 },
+        textShadowRadius: 2
+      }}>
+        Project Pertemuan 4<br />
+        JSX dan Styling
+      </Text>
+
       <Greeting
         name="User"
         isLoggedIn={isLoggedIn}
       />
 
-      {/* Event handling with Button */}
+      {/* Event handling with Button using StyleSheet.create */}
       <View style={styles.buttonContainer}>
         <Button
           title={`Count: ${count}`}
@@ -65,11 +80,17 @@ export default function App() {
         />
       </View>
 
-      {/* Looping through array */}
-      <View style={styles.userList}>
-        <Text style={styles.title}>User List:</Text>
-        {users.map(user => (
-          <Text key={user.id} style={styles.text}>
+      {/* Looping through array using external stylesheet */}
+      <View style={ListStyles.userList}>
+        <Text style={ListStyles.listTitle}>User List:</Text>
+        {users.map((user, index) => (
+          <Text
+            key={user.id}
+            style={[
+              ListStyles.listItem,
+              ListStyles[`listItemColor${(index % 4) + 1}`]
+            ]}
+          >
             {user.id}. {user.name}
           </Text>
         ))}
@@ -80,34 +101,33 @@ export default function App() {
   );
 }
 
+// Internal StyleSheet.create for component-specific styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
     padding: 20,
-  },
-  greetingContainer: {
-    marginBottom: 20,
-    alignItems: 'center',
   },
   buttonContainer: {
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: 20,
-  },
-  userList: {
-    width: '100%',
+    marginVertical: 20,
     padding: 10,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 5,
+    backgroundColor: '#f1f3f5',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.22,
+    shadowRadius: 2.22,
+    elevation: 3,
   },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
+  greetingContainer: {
+    marginBottom: 20,
+    alignItems: 'center',
   },
   text: {
     fontSize: 16,
