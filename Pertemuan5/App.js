@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, Switch, TouchableOpacity, Alert, StyleSheet, FlatList } from 'react-native';
+import { ScrollView, View, Text, TextInput, Button, Switch, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function App() {
@@ -13,7 +13,6 @@ export default function App() {
   const [savedDataList, setSavedDataList] = useState([]);
 
   useEffect(() => {
-    // Coba ambil data yang sudah disimpan saat pertama kali buka
     const loadData = async () => {
       try {
         const savedData = await AsyncStorage.getItem('formData');
@@ -24,7 +23,6 @@ export default function App() {
           setHobi(data.hobi);
         }
 
-        // Ambil semua data tersimpan
         const allData = await AsyncStorage.getItem('allData');
         if (allData !== null) {
           setSavedDataList(JSON.parse(allData));
@@ -44,10 +42,8 @@ export default function App() {
     };
 
     try {
-      // Simpan data terbaru
       await AsyncStorage.setItem('formData', JSON.stringify(data));
 
-      // Tambahkan ke daftar data tersimpan
       const updatedList = [...savedDataList, data];
       await AsyncStorage.setItem('allData', JSON.stringify(updatedList));
       setSavedDataList(updatedList);
@@ -58,62 +54,97 @@ export default function App() {
     }
   };
 
+  const editData = (index) => {
+    const dataToEdit = savedDataList[index];
+    setNama(dataToEdit.nama);
+    setGender(dataToEdit.gender);
+    setHobi(dataToEdit.hobi);
+
+    // Remove the item being edited from the list temporarily
+    const updatedList = savedDataList.filter((_, i) => i !== index);
+    setSavedDataList(updatedList);
+    AsyncStorage.setItem('allData', JSON.stringify(updatedList));
+  };
+
+  const deleteData = async (index) => {
+    const updatedList = savedDataList.filter((_, i) => i !== index);
+    setSavedDataList(updatedList);
+    await AsyncStorage.setItem('allData', JSON.stringify(updatedList));
+    Alert.alert('Data berhasil dihapus!');
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Nama:</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Masukkan nama"
-        value={nama}
-        onChangeText={setNama}
-      />
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.container}>
+        <Text style={styles.label}>Nama:</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Masukkan nama"
+          value={nama}
+          onChangeText={setNama}
+        />
 
-      <Text style={styles.label}>Jenis Kelamin:</Text>
-      {['Pria', 'Wanita'].map((item) => (
-        <TouchableOpacity
-          key={item}
-          style={[styles.radioButton, gender === item && styles.radioActive]}
-          onPress={() => setGender(item)}
-        >
-          <Text>{item}</Text>
-        </TouchableOpacity>
-      ))}
+        <Text style={styles.label}>Jenis Kelamin:</Text>
+        {['Pria', 'Wanita'].map((item) => (
+          <TouchableOpacity
+            key={item}
+            style={[styles.radioButton, gender === item && styles.radioActive]}
+            onPress={() => setGender(item)}
+          >
+            <Text>{item}</Text>
+          </TouchableOpacity>
+        ))}
 
-      <Text style={styles.label}>Hobi:</Text>
-      {Object.keys(hobi).map((item) => (
-        <View key={item} style={styles.hobiRow}>
-          <Switch
-            value={hobi[item]}
-            onValueChange={(val) => setHobi({ ...hobi, [item]: val })}
-          />
-          <Text>{item.charAt(0).toUpperCase() + item.slice(1)}</Text>
+        <Text style={styles.label}>Hobi:</Text>
+        {Object.keys(hobi).map((item) => (
+          <View key={item} style={styles.hobiRow}>
+            <Switch
+              value={hobi[item]}
+              onValueChange={(val) => setHobi({ ...hobi, [item]: val })}
+            />
+            <Text>{item.charAt(0).toUpperCase() + item.slice(1)}</Text>
+          </View>
+        ))}
+
+        <View style={{ marginTop: 20 }}>
+          <Button title="Simpan ke Local Storage" onPress={submitData} />
         </View>
-      ))}
 
-      <View style={{ marginTop: 20 }}>
-        <Button title="Simpan ke Local Storage" onPress={submitData} />
-      </View>
-
-      <Text style={[styles.label, { marginTop: 30 }]}>Daftar Data Tersimpan:</Text>
-      <View style={{ borderWidth: 1, borderColor: '#ddd', borderRadius: 5 }}>
-        <View style={[styles.savedItem, { flexDirection: 'row', backgroundColor: '#f0f0f0' }]}></View>
-        <Text style={{ flex: 1, fontWeight: 'bold' }}>Nama</Text>
-        <Text style={{ flex: 1, fontWeight: 'bold' }}>Gender</Text>
-        <Text style={{ flex: 2, fontWeight: 'bold' }}>Hobi</Text>
-      </View>
-      {savedDataList.map((item, index) => (
-        <View key={index} style={[styles.savedItem, { flexDirection: 'row' }]}>
-          <Text style={{ flex: 1 }}>{item.nama}</Text>
-          <Text style={{ flex: 1 }}>{item.gender}</Text>
-          <Text style={{ flex: 2 }}>{Object.keys(item.hobi).filter(k => item.hobi[k]).join(', ')}</Text>
+        <Text style={[styles.label, { marginTop: 30 }]}>Daftar Data Tersimpan:</Text>
+        <View style={{ borderWidth: 1, borderColor: '#ddd', borderRadius: 5 }}>
+          <View style={[styles.savedItem, { flexDirection: 'row', backgroundColor: '#f0f0f0' }]}>
+            <Text style={{ flex: 1, fontWeight: 'bold' }}>Nama</Text>
+            <Text style={{ flex: 1, fontWeight: 'bold' }}>Gender</Text>
+            <Text style={{ flex: 2, fontWeight: 'bold' }}>Hobi</Text>
+            <Text style={{ flex: 1, fontWeight: 'bold' }}>Aksi</Text>
+          </View>
         </View>
-      ))}
-    </View>
-
+        {savedDataList.map((item, index) => (
+          <View
+            key={index}
+            style={[
+              styles.savedItem,
+              { flexDirection: 'row', backgroundColor: index % 2 === 0 ? '#f9f9f9' : '#ffffff' },
+            ]}
+          >
+            <Text style={{ flex: 1 }}>{item.nama}</Text>
+            <Text style={{ flex: 1 }}>{item.gender}</Text>
+            <Text style={{ flex: 2 }}>{Object.keys(item.hobi).filter(k => item.hobi[k]).join(', ')}</Text>
+            <View style={{ flex: 1, flexDirection: 'row', gap: 10 }}>
+              <Button title="Edit" onPress={() => editData(index)} />
+              <Button title="Hapus" color="red" onPress={() => deleteData(index)} />
+            </View>
+          </View>
+        ))}
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+  },
   container: {
     padding: 20,
     paddingTop: 50,
