@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { ScrollView, View, Text, TextInput, Button, Switch, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Picker } from '@react-native-picker/picker';
 
 export default function App() {
   const [nama, setNama] = useState('');
   const [gender, setGender] = useState('');
+  const [agama, setAgama] = useState(''); // Tambahkan state untuk agama
   const [hobi, setHobi] = useState({
     membaca: false,
     menulis: false,
@@ -20,6 +22,7 @@ export default function App() {
           const data = JSON.parse(savedData);
           setNama(data.nama);
           setGender(data.gender);
+          setAgama(data.agama); // Muat data agama
           setHobi(data.hobi);
         }
 
@@ -38,6 +41,7 @@ export default function App() {
     const data = {
       nama,
       gender,
+      agama, // Simpan agama
       hobi,
     };
 
@@ -48,7 +52,7 @@ export default function App() {
       await AsyncStorage.setItem('allData', JSON.stringify(updatedList));
       setSavedDataList(updatedList);
 
-      Alert.alert('Data Tersimpan!', `Nama: ${nama}\nGender: ${gender}\nHobi: ${Object.keys(hobi).filter(k => hobi[k]).join(', ')}`);
+      Alert.alert('Data Tersimpan!', `Nama: ${nama}\nGender: ${gender}\nAgama: ${agama}\nHobi: ${Object.keys(hobi).filter(k => hobi[k]).join(', ')}`);
     } catch (e) {
       Alert.alert('Gagal menyimpan data!');
     }
@@ -58,9 +62,9 @@ export default function App() {
     const dataToEdit = savedDataList[index];
     setNama(dataToEdit.nama);
     setGender(dataToEdit.gender);
+    setAgama(dataToEdit.agama); // Edit agama
     setHobi(dataToEdit.hobi);
 
-    // Remove the item being edited from the list temporarily
     const updatedList = savedDataList.filter((_, i) => i !== index);
     setSavedDataList(updatedList);
     AsyncStorage.setItem('allData', JSON.stringify(updatedList));
@@ -77,8 +81,6 @@ export default function App() {
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
         <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' }}>Form Input Biodata</Text>
-
-
 
         <Text style={styles.label}>Nama:</Text>
         <TextInput
@@ -98,6 +100,22 @@ export default function App() {
             <Text>{item}</Text>
           </TouchableOpacity>
         ))}
+
+        <Text style={styles.label}>Agama:</Text>
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={agama}
+            onValueChange={(itemValue) => setAgama(itemValue)}
+          >
+            <Picker.Item label="Pilih Agama" value="" />
+            <Picker.Item label="Islam" value="Islam" />
+            <Picker.Item label="Kristen" value="Kristen" />
+            <Picker.Item label="Katolik" value="Katolik" />
+            <Picker.Item label="Hindu" value="Hindu" />
+            <Picker.Item label="Buddha" value="Buddha" />
+            <Picker.Item label="Konghucu" value="Konghucu" />
+          </Picker>
+        </View>
 
         <Text style={styles.label}>Hobi:</Text>
         {Object.keys(hobi).map((item) => (
@@ -119,6 +137,7 @@ export default function App() {
           <View style={[styles.savedItem, { flexDirection: 'row', backgroundColor: '#f0f0f0' }]}>
             <Text style={{ flex: 1, fontWeight: 'bold' }}>Nama</Text>
             <Text style={{ flex: 1, fontWeight: 'bold' }}>Gender</Text>
+            <Text style={{ flex: 1, fontWeight: 'bold' }}>Agama</Text>
             <Text style={{ flex: 2, fontWeight: 'bold' }}>Hobi</Text>
             <Text style={{ flex: 1, fontWeight: 'bold' }}>Aksi</Text>
           </View>
@@ -133,6 +152,7 @@ export default function App() {
           >
             <Text style={{ flex: 1 }}>{item.nama}</Text>
             <Text style={{ flex: 1 }}>{item.gender}</Text>
+            <Text style={{ flex: 1 }}>{item.agama}</Text>
             <Text style={{ flex: 2 }}>{Object.keys(item.hobi).filter(k => item.hobi[k]).join(', ')}</Text>
             <View style={{ flex: 1, flexDirection: 'row', gap: 10 }}>
               <Button title="Edit" onPress={() => editData(index)} />
@@ -180,6 +200,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginVertical: 5,
     gap: 10,
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#999',
+    borderRadius: 5,
+    marginBottom: 10,
   },
   savedItem: {
     padding: 10,
