@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { ScrollView, View, Text, TextInput, Button, Switch, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
+import Slider from '@react-native-community/slider'; // Import Slider
 
 export default function App() {
   const [nama, setNama] = useState('');
   const [gender, setGender] = useState('');
-  const [agama, setAgama] = useState(''); // Tambahkan state untuk agama
+  const [agama, setAgama] = useState('');
+  const [usia, setUsia] = useState(18); // Tambahkan state untuk usia
   const [hobi, setHobi] = useState({
     membaca: false,
     menulis: false,
@@ -22,7 +24,8 @@ export default function App() {
           const data = JSON.parse(savedData);
           setNama(data.nama);
           setGender(data.gender);
-          setAgama(data.agama); // Muat data agama
+          setAgama(data.agama);
+          setUsia(data.usia); // Muat data usia
           setHobi(data.hobi);
         }
 
@@ -41,7 +44,8 @@ export default function App() {
     const data = {
       nama,
       gender,
-      agama, // Simpan agama
+      agama,
+      usia, // Simpan usia
       hobi,
     };
 
@@ -52,7 +56,7 @@ export default function App() {
       await AsyncStorage.setItem('allData', JSON.stringify(updatedList));
       setSavedDataList(updatedList);
 
-      Alert.alert('Data Tersimpan!', `Nama: ${nama}\nGender: ${gender}\nAgama: ${agama}\nHobi: ${Object.keys(hobi).filter(k => hobi[k]).join(', ')}`);
+      Alert.alert('Data Tersimpan!', `Nama: ${nama}\nGender: ${gender}\nAgama: ${agama}\nUsia: ${usia}\nHobi: ${Object.keys(hobi).filter(k => hobi[k]).join(', ')}`);
     } catch (e) {
       Alert.alert('Gagal menyimpan data!');
     }
@@ -62,7 +66,8 @@ export default function App() {
     const dataToEdit = savedDataList[index];
     setNama(dataToEdit.nama);
     setGender(dataToEdit.gender);
-    setAgama(dataToEdit.agama); // Edit agama
+    setAgama(dataToEdit.agama);
+    setUsia(dataToEdit.usia); // Edit usia
     setHobi(dataToEdit.hobi);
 
     const updatedList = savedDataList.filter((_, i) => i !== index);
@@ -117,6 +122,19 @@ export default function App() {
           </Picker>
         </View>
 
+        <Text style={styles.label}>Usia: {usia}</Text>
+        <Slider
+          style={{ width: '100%', height: 40 }}
+          minimumValue={0}
+          maximumValue={100}
+          step={1}
+          value={usia}
+          onValueChange={(value) => setUsia(value)}
+          minimumTrackTintColor="#3399ff"
+          maximumTrackTintColor="#ddd"
+          thumbTintColor="#3399ff"
+        />
+
         <Text style={styles.label}>Hobi:</Text>
         {Object.keys(hobi).map((item) => (
           <View key={item} style={styles.hobiRow}>
@@ -138,6 +156,7 @@ export default function App() {
             <Text style={{ flex: 1, fontWeight: 'bold' }}>Nama</Text>
             <Text style={{ flex: 1, fontWeight: 'bold' }}>Gender</Text>
             <Text style={{ flex: 1, fontWeight: 'bold' }}>Agama</Text>
+            <Text style={{ flex: 1, fontWeight: 'bold' }}>Usia</Text>
             <Text style={{ flex: 2, fontWeight: 'bold' }}>Hobi</Text>
             <Text style={{ flex: 1, fontWeight: 'bold' }}>Aksi</Text>
           </View>
@@ -153,6 +172,7 @@ export default function App() {
             <Text style={{ flex: 1 }}>{item.nama}</Text>
             <Text style={{ flex: 1 }}>{item.gender}</Text>
             <Text style={{ flex: 1 }}>{item.agama}</Text>
+            <Text style={{ flex: 1 }}>{item.usia}</Text>
             <Text style={{ flex: 2 }}>{Object.keys(item.hobi).filter(k => item.hobi[k]).join(', ')}</Text>
             <View style={{ flex: 1, flexDirection: 'row', gap: 10 }}>
               <Button title="Edit" onPress={() => editData(index)} />
