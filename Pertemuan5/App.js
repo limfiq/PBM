@@ -76,6 +76,10 @@ export default function App() {
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
+        <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' }}>Form Input Biodata</Text>
+
+
+
         <Text style={styles.label}>Nama:</Text>
         <TextInput
           style={styles.input}
