@@ -1,0 +1,156 @@
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, Button, Switch, TouchableOpacity, Alert, StyleSheet, FlatList } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+export default function App() {
+  const [nama, setNama] = useState('');
+  const [gender, setGender] = useState('');
+  const [hobi, setHobi] = useState({
+    membaca: false,
+    menulis: false,
+    olahraga: false,
+  });
+  const [savedDataList, setSavedDataList] = useState([]);
+
+  useEffect(() => {
+    // Coba ambil data yang sudah disimpan saat pertama kali buka
+    const loadData = async () => {
+      try {
+        const savedData = await AsyncStorage.getItem('formData');
+        if (savedData !== null) {
+          const data = JSON.parse(savedData);
+          setNama(data.nama);
+          setGender(data.gender);
+          setHobi(data.hobi);
+        }
+
+        // Ambil semua data tersimpan
+        const allData = await AsyncStorage.getItem('allData');
+        if (allData !== null) {
+          setSavedDataList(JSON.parse(allData));
+        }
+      } catch (e) {
+        console.log('Gagal memuat data', e);
+      }
+    };
+    loadData();
+  }, []);
+
+  const submitData = async () => {
+    const data = {
+      nama,
+      gender,
+      hobi,
+    };
+
+    try {
+      // Simpan data terbaru
+      await AsyncStorage.setItem('formData', JSON.stringify(data));
+
+      // Tambahkan ke daftar data tersimpan
+      const updatedList = [...savedDataList, data];
+      await AsyncStorage.setItem('allData', JSON.stringify(updatedList));
+      setSavedDataList(updatedList);
+
+      Alert.alert('Data Tersimpan!', `Nama: ${nama}\nGender: ${gender}\nHobi: ${Object.keys(hobi).filter(k => hobi[k]).join(', ')}`);
+    } catch (e) {
+      Alert.alert('Gagal menyimpan data!');
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.label}>Nama:</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Masukkan nama"
+        value={nama}
+        onChangeText={setNama}
+      />
+
+      <Text style={styles.label}>Jenis Kelamin:</Text>
+      {['Pria', 'Wanita'].map((item) => (
+        <TouchableOpacity
+          key={item}
+          style={[styles.radioButton, gender === item && styles.radioActive]}
+          onPress={() => setGender(item)}
+        >
+          <Text>{item}</Text>
+        </TouchableOpacity>
+      ))}
+
+      <Text style={styles.label}>Hobi:</Text>
+      {Object.keys(hobi).map((item) => (
+        <View key={item} style={styles.hobiRow}>
+          <Switch
+            value={hobi[item]}
+            onValueChange={(val) => setHobi({ ...hobi, [item]: val })}
+          />
+          <Text>{item.charAt(0).toUpperCase() + item.slice(1)}</Text>
+        </View>
+      ))}
+
+      <View style={{ marginTop: 20 }}>
+        <Button title="Simpan ke Local Storage" onPress={submitData} />
+      </View>
+
+      <Text style={[styles.label, { marginTop: 30 }]}>Daftar Data Tersimpan:</Text>
+      <View style={{ borderWidth: 1, borderColor: '#ddd', borderRadius: 5 }}>
+        <View style={[styles.savedItem, { flexDirection: 'row', backgroundColor: '#f0f0f0' }]}></View>
+        <Text style={{ flex: 1, fontWeight: 'bold' }}>Nama</Text>
+        <Text style={{ flex: 1, fontWeight: 'bold' }}>Gender</Text>
+        <Text style={{ flex: 2, fontWeight: 'bold' }}>Hobi</Text>
+      </View>
+      {savedDataList.map((item, index) => (
+        <View key={index} style={[styles.savedItem, { flexDirection: 'row' }]}>
+          <Text style={{ flex: 1 }}>{item.nama}</Text>
+          <Text style={{ flex: 1 }}>{item.gender}</Text>
+          <Text style={{ flex: 2 }}>{Object.keys(item.hobi).filter(k => item.hobi[k]).join(', ')}</Text>
+        </View>
+      ))}
+    </View>
+
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+    paddingTop: 50,
+  },
+  label: {
+    marginTop: 15,
+    marginBottom: 5,
+    fontWeight: 'bold',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#999',
+    padding: 10,
+    borderRadius: 5,
+  },
+  radioButton: {
+    borderWidth: 1,
+    borderColor: '#aaa',
+    padding: 10,
+    marginVertical: 5,
+    borderRadius: 5,
+  },
+  radioActive: {
+    backgroundColor: '#cce5ff',
+    borderColor: '#3399ff',
+  },
+  hobiRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 5,
+    gap: 10,
+  },
+  savedItem: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 5,
+    marginVertical: 5,
+  },
+});
