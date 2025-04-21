@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: React Native Demo App API
-  description: Documentation for React Native app demonstrating basic concepts
+  description: Documentation for React Native app demonstrating JSX and Styling concepts
   version: 1.0.0
   contact:
     name: limfiq
@@ -19,7 +19,7 @@ components:
         name:
           type: string
           description: User's name
-          example: "John"
+          example: "M. Taufiq"
 
     Greeting:
       type: object
@@ -33,6 +33,14 @@ components:
           description: User's login status
           example: true
 
+    Counter:
+      type: object
+      properties:
+        count:
+          type: integer
+          description: Current count value
+          example: 0
+
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
@@ -42,10 +50,12 @@ components:
 paths:
   /users:
     get:
+      tags:
+        - User Management
       summary: Get all users
-      description: Returns a list of all users
+      description: Returns a list of all users with different styling colors
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:
@@ -53,9 +63,22 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/User"
+              example:
+                - id: 1
+                  name: "M. Taufiq"
+                - id: 2
+                  name: "Hullatul"
+                - id: 3
+                  name: "Kayla"
+                - id: 4
+                  name: "Musa"
+                - id: 5
+                  name: "Haisah"
 
   /login:
     post:
+      tags:
+        - Authentication
       summary: Toggle user login status
       description: Toggles between logged in and logged out states
       requestBody:
@@ -69,7 +92,7 @@ paths:
                   type: boolean
                   description: Current login status
       responses:
-        "200":
+        '200':
           description: Login status successfully toggled
           content:
             application/json:
@@ -83,17 +106,42 @@ paths:
                     type: string
                     example: "Login status updated successfully"
 
+  /counter:
+    post:
+      tags:
+        - Counter
+      summary: Increment counter
+      description: Increments the counter by one
+      responses:
+        '200':
+          description: Counter successfully incremented
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Counter"
+
+components:
+  examples:
+    UserListExample:
+      value:
+        - id: 1
+          name: "M. Taufiq"
+        - id: 2
+          name: "Hullatul"
+
 tags:
   - name: User Management
     description: Operations about users
   - name: Authentication
     description: Login related operations
+  - name: Counter
+    description: Counter related operations
 
 servers:
+  - url: http://localhost:8000
+    description: Development server
   - url: https://api.example.com/v1
     description: Production server
-  - url: https://dev-api.example.com/v1
-    description: Development server
 
 security:
   - ApiKeyAuth: []
