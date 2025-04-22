@@ -3,25 +3,15 @@ import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import './screens/StackScreen';
-import './screens/TabScreen';
-import './screens/DrawerScreen'; cc
+import './stack/StackScreen.js';
+import './tab/TabScreen';
+import './drawer/DrawerScreen'; cc
 
 function HomeScreen({ navigation }) {
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('StackScreen', { name: 'Stack' })}>
-        <Text style={styles.buttonText}>Stack</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Details', { name: ' Tab' })}>
-        <Text style={styles.buttonText}>Tab</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Details', { name: 'Drawer' })}>
-        <Text style={styles.buttonText}>Drawer</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Details', { name: 'Nested' })}>
-        <Text style={styles.buttonText}>Nested</Text>
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('TabScreen')}>
+        <Text style={styles.buttonText}>Tab Screen</Text>
       </TouchableOpacity>
     </View>
   );
