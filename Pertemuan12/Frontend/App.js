@@ -1,8 +1,11 @@
 // App.js
-import React, { useState } from 'react';
+// import React, { useState } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { TextInput, Button, Text, Image, Provider as PaperProvider } from 'react-native-paper';
 import Constants from 'expo-constants';
+import React, { useEffect, useState } from 'react';
+import { ScrollView } from 'react-native';
+import { Card, Title, Paragraph } from 'react-native-paper';
 
 export default function App() {
   const [username, setUsername] = useState('');
@@ -99,13 +102,63 @@ export default function App() {
     </View>
   );
 
+  // State and effect for books, must be at the top level of the component
+  const [books, setBooks] = useState([]);
+  const [booksLoading, setBooksLoading] = useState(false);
+  const [booksError, setBooksError] = useState('');
+
+  useEffect(() => {
+    if (!token) return;
+    const fetchBooks = async () => {
+      setBooksLoading(true);
+      setBooksError('');
+      try {
+        const response = await fetch(API_BASE_URL + '/books', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!response.ok) {
+          throw new Error('Gagal memuat data buku');
+        }
+        const data = await response.json();
+        setBooks(data);
+      } catch (err) {
+        setBooksError('Gagal memuat data buku');
+      } finally {
+        setBooksLoading(false);
+      }
+    };
+    fetchBooks();
+  }, [token]);
+
   const renderHome = () => (
     <View style={{ padding: 20, marginTop: Constants.statusBarHeight }}>
       <Text variant="headlineMedium" style={{ textAlign: 'center', marginBottom: 20 }}>Selamat Datang, {username}</Text>
+      {booksLoading ? (
+        <ActivityIndicator style={{ marginTop: 20 }} />
+      ) : booksError ? (
+        <Text style={{ color: 'red', marginTop: 20, textAlign: 'center' }}>{booksError}</Text>
+      ) : (
+        <ScrollView style={{ marginBottom: 20 }}>
+          {books.map((book, idx) => (
+            <Card key={book._id || idx} style={{ marginBottom: 15 }}>
+              <Card.Content>
+                <Title>{book.title}</Title>
+                <Paragraph>Penulis: {book.author}</Paragraph>
+                <Paragraph>{book.description}</Paragraph>
+              </Card.Content>
+            </Card>
+          ))}
+          {books.length === 0 && (
+            <Text style={{ textAlign: 'center', marginTop: 20 }}>Belum ada buku.</Text>
+          )}
+        </ScrollView>
+      )}
+      {/* 
       <View style={{ marginTop: 20, padding: 10, backgroundColor: '#eee', borderRadius: 8 }}>
         <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Token Anda:</Text>
         <Text selectable>{token}</Text>
-      </View>
+      </View> 
+      */}
       <Button
         mode="contained"
         style={{ marginTop: 20 }}
